@@ -1,5 +1,4 @@
-// backend/src/index.ts
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
@@ -11,13 +10,13 @@ app.use(cors());
 app.use(express.json());
 
 // Get all properties
-app.get('/api/properties', async (req, res) => {
+app.get('/api/properties', async (req: Request, res: Response) => {
   const properties = await prisma.nekretnina.findMany();
   res.json(properties);
 });
 
 // Get single property by id
-app.get('/api/properties/:id', async (req, res) => {
+app.get('/api/properties/:id', async (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const property = await prisma.nekretnina.findUnique({ where: { id } });
   if (property) {
