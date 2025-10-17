@@ -6,7 +6,7 @@ async function migrate() {
   const connection = await mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'Marisol89!',
     database: 'property_baza', // your old database
   });
 
