@@ -7,7 +7,7 @@ async function migrate() {
     host: 'localhost',
     user: 'root',
     password: 'Marisol89!',
-    database: 'property_baza', // your old database
+    database: 'new_real_estate_db', // your old database
   });
 
   const prisma = new PrismaClient();
