@@ -2,11 +2,11 @@
 	require_once('../lib/functions.php');
 			
 	$crud = new Admin_Crud;
-	$crud->table = 'single';
+	$crud->table = 'blog';
 	$crud->title_row_name = 'title_hr';
-	$crud->return_url = 'about_us.php';
 	
 	$show['title'] = true; 				//naslov
+	$show['url'] = false; 			//podnaslov
 	$show['text'] = true; 				//tekst
 	$show['front_page'] = false; 		//izdvajanje na naslovnicu ili gdje se već poveže na frontu
 	$show['status'] = false; 			//mogućnost postavljanja statusa (aktivno, neaktivno, zakazano)
@@ -14,34 +14,37 @@
 	$show['expires'] = false; 			//mogućnost postavljanja datuma do kojeg će se neka stranica, članak prikazivat na stranici
 	$show['single_category'] = false; 	//mogućnost pridodavanja stranice ili članka u jednu kategoriju
 	$show['multiple_category'] = false; //mogućnost pridodavanja stranice ili članka u više kategorija (imploda array u string i sprema u multi_categories)
-	$show['video'] = false; 				//polje za upis linka od videa
+	$show['video'] = true; 				//polje za upis linka od videa
 	$show['video_title'] = false;		//naslov videa
 	$show['gmap'] = false; 				//google map
-	$show['featured_img'] = false; 		//izdvojena slika (bivši static image, ali se drugačije sprema)		
+	$show['featured_img'] = false; 	
+	$show['featured_img2'] = false; 		//izdvojena slika (bivši static image, ali se drugačije sprema)		
 	$crud->files_num = 0; 			// broj fajlova koje unosimo, za neograničeno upiši: null
-	$crud->files_titles = false; 		// dali fajlovi trebaju naslov	
+	$crud->files_titles =  false; 		// dali fajlovi trebaju naslov	
 	$crud->img_num = null; 				// broj slika koje unosimo, za neograničeno upiši: null
-	$crud->img_sizes = array(450,299); 	// veličine slika koje unosimo, ako ima samo 2 broja, slika se neće resizati prilikom uplouda
+	$crud->img_sizes = array(400,300); 	// veličine slika koje unosimo, ako ima samo 2 broja, slika se neće resizati prilikom uplouda
 	$crud->img_titles = false; 			// dali slike trebaju naslov
 	
 	$cn = lang_data($crud->table, 'title\_');
 	$column_name = $cn['column_name'];
 	$lang_label = $cn['lang_label'];
-	
-	$id = 1;
-	
-	$crud->id = $id;
-	$data_all = $crud->get_data(); // dohvaća podatke
-	
-	$data = $data_all['data'];
-	$imgs = $data_all['imgs'];
-	
-	for($i = 0; $i < sizeof($column_name); $i++)
+		
+	if( isset($_GET['action']) && isset($_GET['id']) && ! $_POST ) // ako je GET znači da trebamo dohvatiti podatke za id koji je naveden
 	{
-		$files[strtolower($lang_label[$i])] = $data_all['files'][strtolower($lang_label[$i])];
+		$id = (int)$_GET['id'];
+		
+		$crud->id = $id;
+		$data_all = $crud->get_data(); // dohvaća podatke
+		
+		$data = $data_all['data'];
+		$imgs = $data_all['imgs'];
+		
+		for($i = 0; $i < sizeof($column_name); $i++)
+		{
+			$files[strtolower($lang_label[$i])] = $data_all['files'][strtolower($lang_label[$i])];
+		}
 	}
-	
-	if( isset($_POST) && count($_POST) > 0 ) // ako je POST onda spremamo podatke, unosimo ili updateamo
+	else if( isset($_POST) && count($_POST) > 0 ) // ako je POST onda spremamo podatke, unosimo ili updateamo
 	{
 		if( isset($_POST['e_id']) && (int)$_POST['e_id'] > 0 )
 		{
@@ -84,45 +87,21 @@
 	}
 ?>
 
+	<?php
+	if( isset($_GET['action']) && isset($_GET['id']) && ! $_POST )
+	{
+	?>
+		<h1>Uređivanje bloga <br/><a href="<?php echo $crud->table; ?>_unos.php" class="gumb">Dodaj novi</a></h1>
+	<?php
+	}else{
+	?>
+		<h1>Unos bloga</h1>
+	<?php } ?>
 	
 	<form name="<?php echo $crud->table; ?>" id="<?php echo $crud->table; ?>" class="unos" action="" enctype="multipart/form-data" method="post">
-		<input type="hidden" name="e_id" id="e_id" value="<?php echo $crud->id; ?>"/>		
+		<input type="hidden" name="e_id" id="e_id" value="<?php if( isset($_GET['id']) ){ echo $_GET['id']; } ?>"/>		
 		
 		<div class="box-75">
-		<div class="tabs-page">
-				<?php
-					if(sizeof($column_name) != 1){
-					for($i = 0; $i < sizeof($column_name); $i++){
-				?>
-						<a href="javascript:;" id="tab_page_<?php echo strtolower($lang_label[$i]);?>" <?php echo ($i == 0)? 'class="slc"':''; ?>><?php echo $lang_label[$i];?></span></a>
-				<?php
-					}
-					}
-				?>
-			</div>
-			<div class="tabs-page-content">
-				<?php
-					if(sizeof($column_name) == 1){
-				?>
-					
-
-				<?php }else{
-					for($i = 0; $i < sizeof($column_name); $i++)
-					{
-				?>				
-				<div class="editor-page <?php echo ($i == 0)? 'slc':''; ?>" id="tab_page_<?php echo strtolower($lang_label[$i]);?>_content">
-
-					<input type="text" class="" placeholder="Title stranice" name="page_title_<?php echo strtolower($lang_label[$i]);?>" id="page_title_<?php echo strtolower($lang_label[$i]);?>" value="<?php echo isset($data['page_title_'.strtolower($lang_label[$i])])? $data['page_title_'.strtolower($lang_label[$i])] : '' ; ?>"/>
-
-					<input type="text" class="" placeholder="Description stranice" name="page_description_<?php echo strtolower($lang_label[$i]);?>" id="page_description_<?php echo strtolower($lang_label[$i]);?>" value="<?php echo isset($data['page_description_'.strtolower($lang_label[$i])])? $data['page_description_'.strtolower($lang_label[$i])] : '' ; ?>"/>
-
-					<input type="text" class="" placeholder="Keywords stranice" name="page_keywords_<?php echo strtolower($lang_label[$i]);?>" id="page_keywords_<?php echo strtolower($lang_label[$i]);?>" value="<?php echo isset($data['page_keywords_'.strtolower($lang_label[$i])])? $data['page_keywords_'.strtolower($lang_label[$i])] : '' ; ?>"/>
-				</div>
-				<?php
-					}
-				  }
-				?>
-			</div>
 		<?php
 			if($show['title'])
 			{
@@ -144,9 +123,7 @@
 				?>
 					<div class="editor-title slc" id="tab_title_hr_content">
 						<input type="text" placeholder="Naslov" name="title_hr" id="title_hr" value="<?php echo $data['title_hr']; ?>"/>
-						<input type="text" placeholder="Podaslov" name="subtitle_hr" id="subtitle_hr" value="<?php echo $data['subtitle_hr']; ?>"/>
 					</div>
-
 				<?php }else{
 					for($i = 0; $i < sizeof($column_name); $i++)
 					{
@@ -168,10 +145,8 @@
 		<?php 
 			} 
 		?>
-				
-			
-			
-			<?php
+		<input type="text" placeholder="Autor" name="autor_hr" id="autor_hr" value="<?php echo $data['autor_hr']; ?>"/>
+		<?php
 			if($show['text'])
 			{
 			?>
@@ -179,8 +154,9 @@
 				<?php
 				if(sizeof($column_name) == 1){
 				?>		
-					<a href="javascript:;" id="tab_hr" class="slc">Tekst</a>
-					<a href="javascript:;" id="tab2_hr">Kratki tekst na naslovnoj</a>
+					<a href="javascript:;" id="tab_hr" class="slc">Kratki tekst na naslovnoj</a>
+					<a href="javascript:;" id="tab2_hr" class="">Uvodni tekst</a>
+					<a href="javascript:;" id="tab3_hr" class="">Dugi tekst</a>
 				<?php
 				}else{
 					for($i = 0; $i < sizeof($column_name); $i++)
@@ -200,9 +176,7 @@
 					<div class="editor slc" id="tab_hr_content">
 						<textarea class="ckeditor" name="text_hr"><?php echo isset($data['text_hr'])? $data['text_hr'] : '' ; ?></textarea>
 					</div>
-					<div class="editor" id="tab2_hr_content">
-						<textarea class="ckeditor" name="text2_hr"><?php echo isset($data['text2_hr'])? $data['text2_hr'] : '' ; ?></textarea>
-					</div>
+				
 				<?php
 				}else{
 					for($i = 0; $i < sizeof($column_name); $i++)
@@ -219,8 +193,6 @@
 			<?php
 			}
 			?>
-
-			
 			
 			<?php
 			if($crud->img_num > 0 || $crud->img_num === null)
@@ -228,7 +200,7 @@
 			?>
 			<div class="box-100 light">
 				<a class="toggle" href="javascript:;">Otvori / Zatvori</a>
-				<h3>Slike <a href="javascript:;" class="gumb-upload" onclick="sjx('open_upload','slike-upload'); return false;">Unesi slike</a></h3>
+				<h3>Slike<a href="javascript:;" class="gumb-upload" onclick="sjx('open_upload','slike-upload'); return false;">Unesi slike</a></h3>
 						
 				<div id="images-holder" class="image-sort">
 					<?php
@@ -238,20 +210,20 @@
 						{
 						?>
 							<div class="unos-slika" id="img_holder_<?php echo $v['id']; ?>">
-								<img src="<?php echo _SITE_URL;?>lib/plugins/thumb.php?src=<?php echo _SITE_URL; ?>upload_data/site_photos/th_<?php echo $v['photo_name']; ?>&w=250&h=188&zc=1" alt="" />
+								<img src="<?php echo _SITE_URL;?>lib/plugins/thumb.php?src=<?php echo _SITE_URL; ?>upload_data/site_photos/th_<?php echo $v['photo_name']; ?>&w=270&h=188&zc=1" alt="" />
 								<a href="javascript:;" onclick="if(confirm('Slika će se trajno izbrisati! Jeste li sigurni da želite obrisati sliku?')){sjx('del_img',<?php echo $v['id']; ?>); return false;}" class="del_img"><img src="images/icon-delete-round.png" alt="Briši" /></a>
 								<?php
 								if( $crud->img_titles )
 								{
 									if(sizeof($column_name) == 1){
 									?>		
-										<input class="no-sort" type="text" name="img_title_hr_<?php echo $v['id']; ?>" value="<?php echo $v['title_hr']; ?>" placeholder="opis slike..."/>
+										<input type="text" name="img_title_hr_<?php echo $v['id']; ?>" value="<?php echo $v['title_hr']; ?>" placeholder="opis slike..." class="no-sort"/>
 									<?php
 									}else{
 										for($i = 0; $i < sizeof($column_name); $i++)
 										{
 										?>
-										<input class="no-sort" type="text" name="img_title_<?php echo strtolower($lang_label[$i]); ?>_<?php echo $v['id']; ?>" value="<?php echo $v['title_'.strtolower($lang_label[$i])]; ?>" placeholder="[<?php echo $lang_label[$i]; ?>] opis slike..."/>
+										<input type="text" name="img_title_<?php echo strtolower($lang_label[$i]); ?>_<?php echo $v['id']; ?>" value="<?php echo $v['title_'.strtolower($lang_label[$i])]; ?>" placeholder="[<?php echo $lang_label[$i]; ?>] opis slike..." class="no-sort"/>
 									<?php
 										}
 									}
@@ -362,6 +334,37 @@
 			?>
 			
 		</div>
+		
+		<?php
+			if($show['url'])
+			{
+		?>
+		<div class="box-25 light">
+			<?php	
+				if(sizeof($column_name) == 1)
+				{
+				?>
+
+					<h4>Link</h4>
+					<input type="text" name="link_hr" id="link_hr" value="<?php echo $data['link_hr']; ?>"/>
+				<?php
+				}else{
+					for($i = 0; $i < sizeof($column_name); $i++)
+					{
+					?>
+					<h4>Link <span>(<?php echo $lang_label[$i];?>)</span></h4>
+					<input type="text" class="" name="link_<?php echo strtolower($lang_label[$i]);?>" id="link_<?php echo strtolower($lang_label[$i]);?>" value="<?php echo isset($data['link_'.strtolower($lang_label[$i])])? $data['link_'.strtolower($lang_label[$i])] : '' ; ?>"/>
+					<?php
+					}
+				}
+			?>
+			</div>
+		<?php } ?>
+
+		
+
+
+
 		<?php
 		if($show['status'] || $show['date']){
 		?>
@@ -487,7 +490,7 @@
 			<?php
 			if($show['front_page']){
 			?>
-			<h4>Izdvojeno na naslovnicu</h4>
+			<h4>Izdvojeno</h4>
 			
 			<select name="front_page" id="front_page">
 				<option value="ne" <?php echo ($data['front_page'] == 'ne')? 'selected="selected"':'';?>>Ne</option>
@@ -505,7 +508,7 @@
 			
 			<select name="categories_id" id="categories_id">
 				<option value="">-- nije u kategoriji --</option>
-				<?php echo $cat->display_tree_select(0,0,$data['categories_id'],3); ?>
+				<?php echo $cat->display_tree_select(16,0,$data['categories_id'],3); ?>
 			</select> 
 			<?php
 			}
@@ -534,7 +537,15 @@
 			?>
 		</div>
 		<?php } ?>
-		
+		<div class="box-25 last light">
+			<h3>Galerija</h3>
+			<select name="pozicija" id="pozicija">
+				<option value="l" <?php echo ($data['pozicija'] == 'l')? 'selected="selected"':'';?>>Lijevo</option>
+				<option value="r" <?php echo ($data['pozicija'] == 'r')? 'selected="selected"':'';?>>Desno</option>
+				<option value="c" <?php echo ($data['pozicija'] == 'c')? 'selected="selected"':'';?>>Velika</option>
+			</select>
+
+		</div>
 		<?php
 		if($show['featured_img']){
 		$featured_img = Db::query_one('SELECT photo_name FROM site_photos WHERE id = '.$data['image']);
@@ -566,6 +577,40 @@
 		}
 		?>
 		
+
+
+		<?php
+		if($show['featured_img2']){
+		$featured_img2 = Db::query_one('SELECT photo_name FROM site_photos WHERE id = '.$data['image2']);
+		?>
+		<div class="box-25 light">
+			<a class="toggle" href="javascript:;">Otvori / Zatvori</a>
+			<h3>Screen Shot stana</h3>
+			
+				
+			<?php
+			if( isset($_GET['action']) && isset($_GET['id']) && ! $_POST ){
+			?>
+				<a href="javascript:;" onclick="sjx('open_img_selection2', '<?php echo $crud->table; ?>', <?php echo $id; ?>);return false;" class="set_featured_img">Postavi istaknutu sliku</a>
+			<?php }else{ ?>
+				<div class="no_entry" style="font-size:14px;">Stranicu prvo morate spremiti kako bi mogli postaviti istaknutu sliku.</div>
+			<?php } ?>
+		
+			<div id="featured_holder2" class="featured-holder">
+				<?php
+				if($featured_img2){
+				?>
+					<a href="javascript:;" onclick="$('#image2').val('0');$('#featured_holder2').empty();" class="del_img"><img src="images/icon-delete-round.png" alt="Briši" /></a>
+					<img class="featured_img" src="../upload_data/site_photos/th_<?php echo $featured_img2; ?>" alt="" />
+				<?php } ?>
+			</div>
+			<input type="hidden" name="image2" id="image2" value="<?php echo $data['image2']; ?>" />
+		</div>
+		<?php
+		}
+		?>
+		
+
 		<?php
 		if($show['video']){
 		?>
@@ -592,6 +637,7 @@
 				}
 			}
 			?>
+			
 			<h4>URL</h4>
 			<input type="text" name="video_url" id="video_url" value="<?php echo $data['video_url']; ?>">
 				
@@ -613,6 +659,9 @@
 		<div class="save">
 			<div class="submit-wrapper">
 				<input type="submit" name="spremi3" class="spremi_s" value="Spremi" />
+			</div>
+			<div class="submit-wrapper">
+				<input type="submit" name="spremi2" class="spremi_pr" value="Spremi i pregledaj sve" />
 			</div>
 		</div>
 	</form>

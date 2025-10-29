@@ -4,7 +4,7 @@
 	$crud = new Admin_Crud;
 	$crud->table = 'single';
 	$crud->title_row_name = 'title_hr';
-	$crud->return_url = 'about_us.php';
+	$crud->return_url = 'usluge_i_cjenik.php';
 	
 	$show['title'] = true; 				//naslov
 	$show['text'] = true; 				//tekst
@@ -20,15 +20,17 @@
 	$show['featured_img'] = false; 		//izdvojena slika (bivši static image, ali se drugačije sprema)		
 	$crud->files_num = 0; 			// broj fajlova koje unosimo, za neograničeno upiši: null
 	$crud->files_titles = false; 		// dali fajlovi trebaju naslov	
-	$crud->img_num = null; 				// broj slika koje unosimo, za neograničeno upiši: null
-	$crud->img_sizes = array(450,299); 	// veličine slika koje unosimo, ako ima samo 2 broja, slika se neće resizati prilikom uplouda
+	$crud->img_num = 0; 				// broj slika koje unosimo, za neograničeno upiši: null
+	$crud->img_sizes = array(400,300); 	// veličine slika koje unosimo, ako ima samo 2 broja, slika se neće resizati prilikom uplouda
 	$crud->img_titles = false; 			// dali slike trebaju naslov
 	
+
 	$cn = lang_data($crud->table, 'title\_');
 	$column_name = $cn['column_name'];
 	$lang_label = $cn['lang_label'];
+		
 	
-	$id = 1;
+	$id = 4;
 	
 	$crud->id = $id;
 	$data_all = $crud->get_data(); // dohvaća podatke
@@ -83,46 +85,11 @@
 		echo '<div class="success">Uspješno ste spremili podatke!</div>';
 	}
 ?>
-
-	
 	<form name="<?php echo $crud->table; ?>" id="<?php echo $crud->table; ?>" class="unos" action="" enctype="multipart/form-data" method="post">
 		<input type="hidden" name="e_id" id="e_id" value="<?php echo $crud->id; ?>"/>		
 		
 		<div class="box-75">
-		<div class="tabs-page">
-				<?php
-					if(sizeof($column_name) != 1){
-					for($i = 0; $i < sizeof($column_name); $i++){
-				?>
-						<a href="javascript:;" id="tab_page_<?php echo strtolower($lang_label[$i]);?>" <?php echo ($i == 0)? 'class="slc"':''; ?>><?php echo $lang_label[$i];?></span></a>
-				<?php
-					}
-					}
-				?>
-			</div>
-			<div class="tabs-page-content">
-				<?php
-					if(sizeof($column_name) == 1){
-				?>
-					
-
-				<?php }else{
-					for($i = 0; $i < sizeof($column_name); $i++)
-					{
-				?>				
-				<div class="editor-page <?php echo ($i == 0)? 'slc':''; ?>" id="tab_page_<?php echo strtolower($lang_label[$i]);?>_content">
-
-					<input type="text" class="" placeholder="Title stranice" name="page_title_<?php echo strtolower($lang_label[$i]);?>" id="page_title_<?php echo strtolower($lang_label[$i]);?>" value="<?php echo isset($data['page_title_'.strtolower($lang_label[$i])])? $data['page_title_'.strtolower($lang_label[$i])] : '' ; ?>"/>
-
-					<input type="text" class="" placeholder="Description stranice" name="page_description_<?php echo strtolower($lang_label[$i]);?>" id="page_description_<?php echo strtolower($lang_label[$i]);?>" value="<?php echo isset($data['page_description_'.strtolower($lang_label[$i])])? $data['page_description_'.strtolower($lang_label[$i])] : '' ; ?>"/>
-
-					<input type="text" class="" placeholder="Keywords stranice" name="page_keywords_<?php echo strtolower($lang_label[$i]);?>" id="page_keywords_<?php echo strtolower($lang_label[$i]);?>" value="<?php echo isset($data['page_keywords_'.strtolower($lang_label[$i])])? $data['page_keywords_'.strtolower($lang_label[$i])] : '' ; ?>"/>
-				</div>
-				<?php
-					}
-				  }
-				?>
-			</div>
+			
 		<?php
 			if($show['title'])
 			{
@@ -146,7 +113,6 @@
 						<input type="text" placeholder="Naslov" name="title_hr" id="title_hr" value="<?php echo $data['title_hr']; ?>"/>
 						<input type="text" placeholder="Podaslov" name="subtitle_hr" id="subtitle_hr" value="<?php echo $data['subtitle_hr']; ?>"/>
 					</div>
-
 				<?php }else{
 					for($i = 0; $i < sizeof($column_name); $i++)
 					{
@@ -179,14 +145,16 @@
 				<?php
 				if(sizeof($column_name) == 1){
 				?>		
-					<a href="javascript:;" id="tab_hr" class="slc">Tekst</a>
+					<a href="javascript:;" id="tab_hr" class="slc">Uvodni tekst</a>
 					<a href="javascript:;" id="tab2_hr">Kratki tekst na naslovnoj</a>
+					<a href="javascript:;" id="tab3_hr">Dugi tekst</a>
 				<?php
 				}else{
 					for($i = 0; $i < sizeof($column_name); $i++)
 					{
 					?>
 					<a href="javascript:;" id="tab_<?php echo strtolower($lang_label[$i]);?>" <?php echo ($i == 0)? 'class="slc"':''; ?>>Tekst <span>(<?php echo $lang_label[$i];?>)</span></a>
+					
 				<?php
 					}
 				}
@@ -202,6 +170,9 @@
 					</div>
 					<div class="editor" id="tab2_hr_content">
 						<textarea class="ckeditor" name="text2_hr"><?php echo isset($data['text2_hr'])? $data['text2_hr'] : '' ; ?></textarea>
+					</div>
+					<div class="editor" id="tab3_hr_content">
+						<textarea class="ckeditor" name="text3_hr"><?php echo isset($data['text3_hr'])? $data['text3_hr'] : '' ; ?></textarea>
 					</div>
 				<?php
 				}else{
@@ -219,8 +190,6 @@
 			<?php
 			}
 			?>
-
-			
 			
 			<?php
 			if($crud->img_num > 0 || $crud->img_num === null)
